@@ -1,5 +1,4 @@
 import os
-import asyncio
 import logging
 
 import discord
@@ -9,6 +8,7 @@ from general import General
 from tracking import Tracking
 
 logging.basicConfig(level=logging.DEBUG)
+
 
 class PMAttendanceTracker(commands.bot.Bot):
     def __init__(self):
@@ -20,6 +20,7 @@ class PMAttendanceTracker(commands.bot.Bot):
         await self.add_cog(Tracking(self))
         await self.tree.sync()
 
+
 def main():
     token = os.environ.get("BOT_TOKEN")
     if not token:
@@ -28,6 +29,7 @@ def main():
             token = f.read().strip()
 
     PMAttendanceTracker().run(token)
+
 
 if __name__ == "__main__":
     main()
