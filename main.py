@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands
 
 from general import General
+from tracking import Tracking
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -16,6 +17,7 @@ class PMAttendanceTracker(commands.bot.Bot):
 
     async def on_ready(self):
         await self.add_cog(General(self))
+        await self.add_cog(Tracking(self))
         await self.tree.sync()
 
 def main():
