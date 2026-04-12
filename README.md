@@ -8,7 +8,7 @@ View channels, send messages (bitmask 3072) for now
 ## Developing
 Run `uv run ruff check` and `uv run ruff format` before committing
 
-For local testing, put a `BOT_TOKEN` env var in a local `.env` file, then `uv run --env-file .env main.py`
+For local testing, put a `BOT_TOKEN` env var in a local `.env` file, then `uv run --env-file .env pm-attendance-tracker`
 
 For building and testing the docker image locally, do something like `docker build -t pm-attendance-tracker .` and `docker run -it --rm --env-file=.env pm-attendance-tracker`
 
@@ -21,5 +21,8 @@ For making a release, bump version number in `pyproject.toml`, add a changelog e
 
 ## Changelog
 
-### 0.1.0
+### 0.1.1
+Fix docker image build
+
+### 0.1.0 (broken)
 MVP, tracking functionality works (didn't exhaustively test for edge cases)

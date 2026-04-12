@@ -27,4 +27,4 @@ FROM python:3.14-slim
 COPY --from=builder /app/.venv /app/.venv
 
 # Run the application
-CMD ["/app/.venv/bin/main"]
+CMD ["/app/.venv/bin/pm-attendance-tracker"]

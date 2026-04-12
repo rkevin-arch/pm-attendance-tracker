@@ -1,11 +1,10 @@
-import os
 import logging
 
 import discord
 from discord.ext import commands
 
-from general import General
-from tracking import Tracking
+from pm_attendance_tracker.general import General
+from pm_attendance_tracker.tracking import Tracking
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -19,17 +18,3 @@ class PMAttendanceTracker(commands.bot.Bot):
         await self.add_cog(General(self))
         await self.add_cog(Tracking(self))
         await self.tree.sync()
-
-
-def main():
-    token = os.environ.get("BOT_TOKEN")
-    if not token:
-        print("BOT_TOKEN env var not present, reading token from token.txt")
-        with open("token.txt") as f:
-            token = f.read().strip()
-
-    PMAttendanceTracker().run(token)
-
-
-if __name__ == "__main__":
-    main()
