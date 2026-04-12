@@ -1,0 +1,9 @@
+name: Build docker image
+on: [push]
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker build .
