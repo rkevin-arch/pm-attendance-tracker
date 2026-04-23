@@ -108,6 +108,7 @@ class Tracking(commands.Cog):
     @discord.app_commands.command(
         name="start-meeting", description="Start tracking attendees for a meeting"
     )
+    @discord.app_commands.guild_only
     async def start_meeting(self, interaction: discord.Interaction):
         user = interaction.user
         if not user.voice or not user.voice.channel:
@@ -133,6 +134,7 @@ class Tracking(commands.Cog):
         name="checkin",
         description="Check someone else into the current meeting manually",
     )
+    @discord.app_commands.guild_only
     async def checkin(
         self, interaction: discord.Interaction, checkin_member: discord.Member
     ):
@@ -165,6 +167,7 @@ class Tracking(commands.Cog):
     @discord.app_commands.command(
         name="end-meeting", description="Stop a meeting and post the list of attendees"
     )
+    @discord.app_commands.guild_only
     async def end_meeting(self, interaction: discord.Interaction):
         user = interaction.user
         if not user.voice or not user.voice.channel:

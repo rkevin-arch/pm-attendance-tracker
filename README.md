@@ -20,6 +20,9 @@ For making a release, bump version number in `pyproject.toml` and run `uv lock`,
 
 ## Changelog
 
+### 0.1.3
+limit tracking commands to guild only
+
 ### 0.1.2
 added meeting date and participant count to meeting summary, attach meeting summary as a file if it is too long, and fixed a logging f-string
 
