@@ -1,6 +1,8 @@
 import logging
 import datetime
 import discord
+import io
+import zoneinfo
 from discord.ext import commands
 
 # you must be in vc for 5 minutes to count as a participant
@@ -67,8 +69,16 @@ class TrackedVC:
         return [u for u in self.users.values() if u.isActiveParticipant()]
 
     def get_summary_string(self):
-        header = f"Meeting ran for: {str(datetime.datetime.now(datetime.UTC) - self.start_time)}\nParticipants:"
-        return "\n".join([header] + [str(u) for u in self.get_active_participants()])
+        date = self.start_time.astimezone(
+            zoneinfo.ZoneInfo("America/New_York")
+        ).strftime("%F")
+        participants = self.get_active_participants()
+        headers = [
+            f"Summary for meeting on {date}:",
+            f"Meeting ran for: {str(datetime.datetime.now(datetime.UTC) - self.start_time)}",
+            f"{len(participants)} participants joined:",
+        ]
+        return "\n".join(headers + ["- " + str(u) for u in participants])
 
 
 class Tracking(commands.Cog):
@@ -81,7 +91,7 @@ class Tracking(commands.Cog):
         if before.channel is None:
             if after.channel is None:
                 logger.warning(
-                    "a user has a voice status update but isn't in vc before or after? f{member} f{before} f{after}"
+                    f"a user has a voice status update but isn't in vc before or after? {member} {before} {after}"
                 )
                 return
             vc = after.channel
@@ -171,7 +181,16 @@ class Tracking(commands.Cog):
         logging.info(f"{user.id} ended meeting {vc.id}")
         for i in vc.members:
             self.tracked_vcs[vc].leave(i)
-        await interaction.response.send_message(
-            self.tracked_vcs[vc].get_summary_string()
-        )
+        response = self.tracked_vcs[vc].get_summary_string()
+        if len(response) >= 1900:
+            await interaction.response.send_message(
+                "Meeting summary attached",
+                file=discord.File(
+                    io.StringIO(response), filename="meeting_summary.txt"
+                ),
+            )
+        else:
+            await interaction.response.send_message(
+                self.tracked_vcs[vc].get_summary_string()
+            )
         del self.tracked_vcs[vc]

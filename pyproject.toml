@@ -1,6 +1,6 @@
 [project]
 name = "pm-attendance-tracker"
-version = "0.1.1"
+version = "0.1.2"
 description = "discord bot for tracking meeting attendance"
 readme = "README.md"
 requires-python = ">=3.14"
