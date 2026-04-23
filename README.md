@@ -12,7 +12,11 @@ For local testing, put a `BOT_TOKEN` env var in a local `.env` file, then `uv ru
 
 For building and testing the docker image locally, do something like `docker build -t pm-attendance-tracker .` and `docker run -it --rm --env-file=.env pm-attendance-tracker`
 
-For making a release, bump version number in `pyproject.toml` and run `uv lock`, add a changelog entry here, and push to github to make sure CI passes. After that, `git tag` it to the right version and push the tag to build and push the image to GHCR
+## Releasing
+
+For making a release, bump version number in `pyproject.toml` and run `uv lock`, add a changelog entry here, and push to github to make sure CI passes. After that, `git tag` it to the right version and push the tag to build and push the image to GHCR.
+
+The current production version is running on RK's personal server, although there is nothing stopping anyone from making another bot and running an identical copy themselves. To update the current production version, RK will have to update the docker tag and sync in [ArgoCD](https://argocd.rkevin.dev/applications/argocd/pm-attendance-tracker) (inaccessible to others). Maybe I'll set up keel to automatically deploy the latest version from GHCR, but probably good to have manual deploys for now in case we push bugs.
 
 ## Todos
 - implement tracking members in a spreadsheet (also think about permissions for starting meetings if we have this bot autoupdate spreadsheets. maybe for the meeting end message, there is a button in the modal that only admins can click on to track this meeting)
