@@ -8,7 +8,7 @@ View channels, send messages (bitmask 3072) for now
 ## Configuration
 All configuration is done via environment variables. You should set the following:
 - `BOT_TOKEN`: Authenticate the bot to Discord
-= `MEETING_DB_DIR`: A directory with yaml files containing past meeting information. This directory should be persistent
+- `MEETING_DB_DIR`: A directory with yaml files containing past meeting information. This directory should be persistent
 
 For local development, you should put them in a local `.env` file. For production, it depends on how you like to run discord bots (the current version hosted by RK is deployed via k8s, so env vars are defined in the deployment or mounted from k8s secrets.
 
