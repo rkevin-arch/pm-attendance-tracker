@@ -5,10 +5,17 @@ Simple discord bot for meeting tracking for [Packmates Mutual Aid](https://packm
 ## Bot permissions
 View channels, send messages (bitmask 3072) for now
 
+## Configuration
+All configuration is done via environment variables. You should set the following:
+- `BOT_TOKEN`: Authenticate the bot to Discord
+= `MEETING_DB_DIR`: A directory with yaml files containing past meeting information. This directory should be persistent
+
+For local development, you should put them in a local `.env` file. For production, it depends on how you like to run discord bots (the current version hosted by RK is deployed via k8s, so env vars are defined in the deployment or mounted from k8s secrets.
+
 ## Developing
 Run `uv run ruff check` and `uv run ruff format` before committing. Alternatively, use `cd .git/hooks && ln -sf ../../.github/scripts/pre-commit .` to install a precommit hook that does this for you.
 
-For local testing, put a `BOT_TOKEN` env var in a local `.env` file, then `uv run --env-file .env pm-attendance-tracker`
+For local testing, use `uv run --env-file .env pm-attendance-tracker`.
 
 For building and testing the docker image locally, do something like `docker build -t pm-attendance-tracker .` and `docker run -it --rm --env-file=.env pm-attendance-tracker`
 
@@ -23,6 +30,9 @@ The current production version is running on RK's personal server, although ther
 - fault tolerance for when bot has to be restarted during a meeting (keep track of state in local file? we will lose vc state regardless, this will be hard)
 
 ## Changelog
+
+### 0.2.0
+add standing checker, with a readonly "db" which is just yamls written by hand for now. will add autostore in the future
 
 ### 0.1.3
 limit tracking commands to guild only

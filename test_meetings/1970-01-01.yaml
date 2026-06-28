@@ -1,0 +1,17 @@
+# sample file format
+
+# version 1 of this file format, in case we wanna make backwards incompatible changes to it
+# in that case, we would bump the version
+pmat_meeting_version: 1
+
+# meeting date. this will be used to sort all meetings. yyyy-mm-dd
+date: 1970-01-01
+
+# meeting duration, in the format that `str(timedelta)` would display
+# this isn't used much outside of tracking for now
+# for older meetings where we didn't track duration, this may be 0:00:00
+duration: 0:00:00
+
+# list of participants' discord ids. we do not keep track of usernames or display names here
+participant_ids:
+- 1377775351639441471 # sample account

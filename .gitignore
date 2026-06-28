@@ -9,4 +9,10 @@ wheels/
 # Virtual environments
 .venv
 
+# editor tmpfiles
+*.swp
+
+# secrets, test files
 .env
+test_meetings/*
+!test_meetings/1970-01-01.yaml
