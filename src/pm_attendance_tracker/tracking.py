@@ -127,7 +127,9 @@ class Tracking(commands.Cog):
         for i in vc.members:
             self.tracked_vcs[vc].join(i)
         await interaction.response.send_message(
-            f"Meeting started in VC channel <#{vc.id}>!"
+            f"Meeting started in VC channel <#{vc.id}>!\n"
+            "If you are listening in the meeting in VC, you will be marked as present and you are good to go! No need to do anything special.\n"
+            "If you have someone else listening in through your connection, but isn't in VC according to discord, you can check them in manually via the `/checkin @someone` command."
         )
 
     @discord.app_commands.command(
@@ -148,6 +150,11 @@ class Tracking(commands.Cog):
         if vc not in self.tracked_vcs:
             await interaction.response.send_message(
                 "ERROR: This VC isn't being tracked as part of a meeting currently!"
+            )
+            return
+        if user.id == checkin_member.id:
+            await interaction.response.send_message(
+                "ERROR: There is no need to check yourself in! Being in the VC for 5 minutes would check you in automatically."
             )
             return
         self.tracked_vcs[vc].users[checkin_member] = TrackedUser(

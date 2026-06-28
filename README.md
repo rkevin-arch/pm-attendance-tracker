@@ -31,6 +31,9 @@ The current production version is running on RK's personal server, although ther
 
 ## Changelog
 
+### 0.2.1
+clarified checkin messaging. also added a half baked attempt at view interactions in the ping test, so we can add a button to mark a meeting as a general meeting in the future.
+
 ### 0.2.0
 add standing checker, with a readonly "db" which is just yamls written by hand for now. will add autostore in the future
 
