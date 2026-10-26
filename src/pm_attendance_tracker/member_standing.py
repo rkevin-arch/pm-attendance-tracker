@@ -93,3 +93,55 @@ class MemberStanding(commands.Cog):
             + [f"- {i['date']}" for i in joined_meetings]
         )
         await interaction.response.send_message(message, ephemeral=True)
+
+    @discord.app_commands.command(
+        name="check-meeting-standing",
+        description="Check if everyone in a meeting is in good standing. Useful for deciding to speed up meetings",
+    )
+    @discord.app_commands.guild_only
+    async def check_meeting_standing(self, interaction: discord.Interaction):
+        user = interaction.user
+        if not user.voice or not user.voice.channel:
+            await interaction.response.send_message(
+                "ERROR: You must be in VC to do this action!", ephemeral=True
+            )
+            return
+        vc = user.voice.channel
+        tracked_vc = self.bot.get_cog("Tracking").tracked_vcs.get(vc)
+        if not tracked_vc:
+            await interaction.response.send_message(
+                "ERROR: This VC isn't being tracked as part of a meeting currently!",
+                ephemeral=True,
+            )
+            return
+
+        # this should include anyone in the vc currently, anyone who left but counts as participated, and anyone manually checked in
+        current_users = set(
+            vc.members + [u.user for u in tracked_vc.get_active_participants()]
+        )
+        good_standing_users = 0
+        not_good_standing_summary = []
+        for user in current_users:
+            if user.id in self.good_standing_members:
+                good_standing_users += 1
+                continue
+            joined_meetings = sum(
+                (1 for i in self.active_meetings if user.id in i["participant_ids"])
+            )
+            not_good_standing_summary.append(
+                f"- <@{user.id}> (joined {joined_meetings}/{len(self.active_meetings)} meetings)"
+            )
+
+        result = [
+            f"{good_standing_users}/{len(current_users)} participant(s) are in good standing."
+        ]
+        print(current_users, good_standing_users, not_good_standing_summary)
+        if len(not_good_standing_summary) == 0:
+            result.append("Everyone present is in good standing!")
+        else:
+            result.append("The following participant(s) are not in good standing:")
+            result += not_good_standing_summary[:15]
+            if len(not_good_standing_summary) > 15:
+                result.append(f"- ... and {len(not_good_standing_summary) - 15} more")
+
+        await interaction.response.send_message("\n".join(result))
