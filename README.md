@@ -31,6 +31,11 @@ The current production version is running on RK's personal server, although ther
 
 ## Changelog
 
+### 0.3.0
+- added a `/check-meeting-standing` command to easily check if all participants in the meeting are in good standing (for e.g. speeding up meeting proceedings if everyone is familiar with what's going on)
+- meeting summary message after `/end-meeting` now produces a `pmat_meeting_version: 1` yaml file that can be dumped into the meeting history db dir easily
+- error messages for meeting related commands are now ephemeral (visible only by the user who initiated it) so it doesn't spam the channel
+
 ### 0.2.1
 clarified checkin messaging. also added a half baked attempt at view interactions in the ping test, so we can add a button to mark a meeting as a general meeting in the future.
 
