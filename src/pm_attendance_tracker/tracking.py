@@ -113,13 +113,14 @@ class Tracking(commands.Cog):
         user = interaction.user
         if not user.voice or not user.voice.channel:
             await interaction.response.send_message(
-                "ERROR: You must be in VC to do this action!"
+                "ERROR: You must be in VC to do this action!", ephemeral=True
             )
             return
         vc = user.voice.channel
         if vc in self.tracked_vcs:
             await interaction.response.send_message(
-                "ERROR: This VC is already being tracked as part of a meeting!"
+                "ERROR: This VC is already being tracked as part of a meeting!",
+                ephemeral=True,
             )
             return
         logging.info(f"{user.id} started meeting for {vc.id}")
@@ -143,18 +144,20 @@ class Tracking(commands.Cog):
         user = interaction.user
         if not user.voice or not user.voice.channel:
             await interaction.response.send_message(
-                "ERROR: You must be in VC to do this action!"
+                "ERROR: You must be in VC to do this action!", ephemeral=True
             )
             return
         vc = user.voice.channel
         if vc not in self.tracked_vcs:
             await interaction.response.send_message(
-                "ERROR: This VC isn't being tracked as part of a meeting currently!"
+                "ERROR: This VC isn't being tracked as part of a meeting currently!",
+                ephemeral=True,
             )
             return
         if user.id == checkin_member.id:
             await interaction.response.send_message(
-                "ERROR: There is no need to check yourself in! Being in the VC for 5 minutes would check you in automatically."
+                "ERROR: There is no need to check yourself in! Being in the VC for 5 minutes would check you in automatically.",
+                ephemeral=True,
             )
             return
         self.tracked_vcs[vc].users[checkin_member] = TrackedUser(
@@ -179,13 +182,14 @@ class Tracking(commands.Cog):
         user = interaction.user
         if not user.voice or not user.voice.channel:
             await interaction.response.send_message(
-                "ERROR: You must be in VC to do this action!"
+                "ERROR: You must be in VC to do this action!", ephemeral=True
             )
             return
         vc = user.voice.channel
         if vc not in self.tracked_vcs:
             await interaction.response.send_message(
-                "ERROR: This VC isn't being tracked as part of a meeting currently!"
+                "ERROR: This VC isn't being tracked as part of a meeting currently!",
+                ephemeral=True,
             )
             return
         logging.info(f"{user.id} ended meeting {vc.id}")
