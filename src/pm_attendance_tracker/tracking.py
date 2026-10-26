@@ -2,6 +2,7 @@ import logging
 import datetime
 import discord
 import io
+import yaml
 import zoneinfo
 from discord.ext import commands
 
@@ -68,17 +69,29 @@ class TrackedVC:
     def get_active_participants(self):
         return [u for u in self.users.values() if u.isActiveParticipant()]
 
-    def get_summary_string(self):
-        date = self.start_time.astimezone(
+    def get_date(self):
+        return self.start_time.astimezone(
             zoneinfo.ZoneInfo("America/New_York")
         ).strftime("%F")
+
+    def get_summary_string(self):
         participants = self.get_active_participants()
         headers = [
-            f"Summary for meeting on {date}:",
+            f"Summary for meeting on {self.get_date()}:",
             f"Meeting ran for: {str(datetime.datetime.now(datetime.UTC) - self.start_time)}",
             f"{len(participants)} participants joined:",
         ]
         return "\n".join(headers + ["- " + str(u) for u in participants])
+
+    def get_meeting_record(self):
+        return yaml.dump(
+            {
+                "pmat_meeting_version": 1,
+                "date": self.get_date(),
+                "duration": str(datetime.datetime.now(datetime.UTC) - self.start_time),
+                "participant_ids": [u.user.id for u in self.get_active_participants()],
+            }
+        )
 
 
 class Tracking(commands.Cog):
@@ -195,16 +208,25 @@ class Tracking(commands.Cog):
         logging.info(f"{user.id} ended meeting {vc.id}")
         for i in vc.members:
             self.tracked_vcs[vc].leave(i)
-        response = self.tracked_vcs[vc].get_summary_string()
+
+        tracked_vc = self.tracked_vcs[vc]
+        response = tracked_vc.get_summary_string()
+
+        meeting_record = discord.File(
+            io.StringIO(tracked_vc.get_meeting_record()),
+            filename=f"{tracked_vc.get_date()}.yaml",
+        )
+
         if len(response) >= 1900:
             await interaction.response.send_message(
-                "Meeting summary attached",
-                file=discord.File(
-                    io.StringIO(response), filename="meeting_summary.txt"
-                ),
+                "Meeting summary attached in meeting_summary.txt",
+                files=[
+                    discord.File(io.StringIO(response), filename="meeting_summary.txt"),
+                    meeting_record,
+                ],
             )
         else:
             await interaction.response.send_message(
-                self.tracked_vcs[vc].get_summary_string()
+                self.tracked_vcs[vc].get_summary_string(), file=meeting_record
             )
         del self.tracked_vcs[vc]
