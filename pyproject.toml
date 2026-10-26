@@ -1,6 +1,6 @@
 [project]
 name = "pm-attendance-tracker"
-version = "0.3.0"
+version = "0.3.1"
 description = "discord bot for tracking meeting attendance"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -19,5 +19,16 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pyright>=1.1.414",
     "ruff>=0.15.10",
 ]
+
+[tool.ruff.lint]
+preview = true
+extend-select = [
+    "T201", # no stray prints
+    "DTZ", # datetime stuff
+]
+
+[tool.pyright]
+typeCheckingMode = "standard"

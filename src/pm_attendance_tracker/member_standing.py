@@ -1,17 +1,21 @@
-import discord
-import yaml
+import collections
 import logging
 import os
 import pathlib
-import collections
+from typing import TYPE_CHECKING
+
+import discord
+import yaml
 from discord.ext import commands
-from typing import Optional
+
+if TYPE_CHECKING:
+    from pm_attendance_tracker.main import PMAttendanceTracker
 
 logger = logging.getLogger(__name__)
 
 
 class MemberStanding(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: PMAttendanceTracker):
         self.bot = bot
 
         try:
@@ -19,11 +23,10 @@ class MemberStanding(commands.Cog):
             logger.info(
                 f"Member standing DB loaded with {len(self.good_standing_members)} in good standing."
             )
-        except Exception as e:
-            logger.warning(
+        except Exception:
+            logger.exception(
                 "Loading past meeting info has failed! Member standing DB will be initialized to empty"
             )
-            logger.exception(e)
             self.active_meetings = []
             self.good_standing_members = []
 
@@ -60,9 +63,8 @@ class MemberStanding(commands.Cog):
                 f"Done! We now have {len(self.good_standing_members)} members in good standing.",
                 ephemeral=True,
             )
-        except Exception as e:
-            logger.warning("Reloading past meeting info has failed!")
-            logger.exception(e)
+        except Exception:
+            logger.exception("Reloading past meeting info has failed!")
             await interaction.response.send_message(
                 "Reload has failed! Check logs for details.", ephemeral=True
             )
@@ -73,8 +75,14 @@ class MemberStanding(commands.Cog):
     )
     @discord.app_commands.guild_only
     async def standing(
-        self, interaction: discord.Interaction, member: Optional[discord.Member]
+        self, interaction: discord.Interaction, member: discord.Member | None
     ):
+        if not isinstance(interaction.user, discord.Member):
+            await interaction.response.send_message(
+                "You are not sending this from a guild! This should never happen. Please contact RK",
+                ephemeral=True,
+            )
+            return
         if member is None:
             member = interaction.user
         joined_meetings = [
@@ -101,13 +109,13 @@ class MemberStanding(commands.Cog):
     @discord.app_commands.guild_only
     async def check_meeting_standing(self, interaction: discord.Interaction):
         user = interaction.user
-        if not user.voice or not user.voice.channel:
+        vc = self.bot.tracking.get_user_vc(user)
+        if not vc:
             await interaction.response.send_message(
                 "ERROR: You must be in VC to do this action!", ephemeral=True
             )
             return
-        vc = user.voice.channel
-        tracked_vc = self.bot.get_cog("Tracking").tracked_vcs.get(vc)
+        tracked_vc = self.bot.tracking.tracked_vcs.get(vc)
         if not tracked_vc:
             await interaction.response.send_message(
                 "ERROR: This VC isn't being tracked as part of a meeting currently!",
@@ -126,7 +134,7 @@ class MemberStanding(commands.Cog):
                 good_standing_users += 1
                 continue
             joined_meetings = sum(
-                (1 for i in self.active_meetings if user.id in i["participant_ids"])
+                1 for i in self.active_meetings if user.id in i["participant_ids"]
             )
             not_good_standing_summary.append(
                 f"- <@{user.id}> (joined {joined_meetings}/{len(self.active_meetings)} meetings)"
@@ -135,7 +143,6 @@ class MemberStanding(commands.Cog):
         result = [
             f"{good_standing_users}/{len(current_users)} participant(s) are in good standing."
         ]
-        print(current_users, good_standing_users, not_good_standing_summary)
         if len(not_good_standing_summary) == 0:
             result.append("Everyone present is in good standing!")
         else:

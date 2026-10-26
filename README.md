@@ -13,7 +13,7 @@ All configuration is done via environment variables. You should set the followin
 For local development, you should put them in a local `.env` file. For production, it depends on how you like to run discord bots (the current version hosted by RK is deployed via k8s, so env vars are defined in the deployment or mounted from k8s secrets.
 
 ## Developing
-Run `uv run ruff check` and `uv run ruff format` before committing. Alternatively, use `cd .git/hooks && ln -sf ../../.github/scripts/pre-commit .` to install a precommit hook that does this for you.
+Run `uv run ruff check`, `uv run ruff format`, `uv run pyright` before committing. Alternatively, use `cd .git/hooks && ln -sf ../../.github/scripts/pre-commit .` to install a precommit hook that does this for you.
 
 For local testing, use `uv run --env-file .env pm-attendance-tracker`.
 
@@ -30,6 +30,11 @@ The current production version is running on RK's personal server, although ther
 - fault tolerance for when bot has to be restarted during a meeting (keep track of state in local file? we will lose vc state regardless, this will be hard)
 
 ## Changelog
+
+### 0.3.1
+- enabled more ruff checks, added pyright typechecks
+- many small bugfixes to placate the newly added checks (no user facing changes)
+- upgrade python to 3.15 and upgrade dependencies
 
 ### 0.3.0
 - added a `/check-meeting-standing` command to easily check if all participants in the meeting are in good standing (for e.g. speeding up meeting proceedings if everyone is familiar with what's going on)

@@ -1,7 +1,7 @@
-name: Ruff linting
+name: All linting
 on: [push]
 jobs:
-  ruff:
+  linting:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -13,3 +13,5 @@ jobs:
         run: uv run ruff check
       - name: Ruff format
         run: uv run ruff format --check
+      - name: Pyright
+        run: uv run pyright

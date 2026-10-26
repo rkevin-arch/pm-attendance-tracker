@@ -1,10 +1,15 @@
-import logging
 import datetime
-import discord
 import io
-import yaml
+import logging
 import zoneinfo
+from typing import TYPE_CHECKING
+
+import discord
+import yaml
 from discord.ext import commands
+
+if TYPE_CHECKING:
+    from pm_attendance_tracker.main import PMAttendanceTracker
 
 # you must be in vc for 5 minutes to count as a participant
 PARTICIPANT_VC_TIME_THRESHOLD = 300
@@ -26,7 +31,7 @@ class TrackedUser:
             )
             return
         self.join_time = datetime.datetime.now(datetime.UTC)
-        logging.debug(f"user {self.user.id} joined")
+        logger.debug(f"user {self.user.id} joined")
 
     def leave(self):
         if not self.join_time:
@@ -36,7 +41,7 @@ class TrackedUser:
             return
         self.total_time += datetime.datetime.now(datetime.UTC) - self.join_time
         self.join_time = None
-        logging.debug(f"user {self.user.id} left, total time {self.total_time}")
+        logger.debug(f"user {self.user.id} left, total time {self.total_time}")
 
     def isActiveParticipant(self):
         return (
@@ -78,7 +83,7 @@ class TrackedVC:
         participants = self.get_active_participants()
         headers = [
             f"Summary for meeting on {self.get_date()}:",
-            f"Meeting ran for: {str(datetime.datetime.now(datetime.UTC) - self.start_time)}",
+            f"Meeting ran for: {datetime.datetime.now(datetime.UTC) - self.start_time!s}",
             f"{len(participants)} participants joined:",
         ]
         return "\n".join(headers + ["- " + str(u) for u in participants])
@@ -95,9 +100,15 @@ class TrackedVC:
 
 
 class Tracking(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: PMAttendanceTracker):
         self.bot = bot
         self.tracked_vcs = {}
+
+    @staticmethod
+    def get_user_vc(user):
+        if isinstance(user, discord.Member) and user.voice:
+            return user.voice.channel
+        return None
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -124,19 +135,19 @@ class Tracking(commands.Cog):
     @discord.app_commands.guild_only
     async def start_meeting(self, interaction: discord.Interaction):
         user = interaction.user
-        if not user.voice or not user.voice.channel:
+        vc = self.get_user_vc(user)
+        if not vc:
             await interaction.response.send_message(
                 "ERROR: You must be in VC to do this action!", ephemeral=True
             )
             return
-        vc = user.voice.channel
         if vc in self.tracked_vcs:
             await interaction.response.send_message(
                 "ERROR: This VC is already being tracked as part of a meeting!",
                 ephemeral=True,
             )
             return
-        logging.info(f"{user.id} started meeting for {vc.id}")
+        logger.info(f"{user.id} started meeting for {vc.id}")
         self.tracked_vcs[vc] = TrackedVC(vc, user)
         for i in vc.members:
             self.tracked_vcs[vc].join(i)
@@ -155,12 +166,12 @@ class Tracking(commands.Cog):
         self, interaction: discord.Interaction, checkin_member: discord.Member
     ):
         user = interaction.user
-        if not user.voice or not user.voice.channel:
+        vc = self.get_user_vc(user)
+        if not vc:
             await interaction.response.send_message(
                 "ERROR: You must be in VC to do this action!", ephemeral=True
             )
             return
-        vc = user.voice.channel
         if vc not in self.tracked_vcs:
             await interaction.response.send_message(
                 "ERROR: This VC isn't being tracked as part of a meeting currently!",
@@ -176,7 +187,7 @@ class Tracking(commands.Cog):
         self.tracked_vcs[vc].users[checkin_member] = TrackedUser(
             checkin_member, manual_checkin=True
         )
-        logging.info(
+        logger.info(
             f"{user.id} has checked in {checkin_member.id} manually for meeting {vc.id}"
         )
         if interaction.channel_id != vc.id:
@@ -193,19 +204,19 @@ class Tracking(commands.Cog):
     @discord.app_commands.guild_only
     async def end_meeting(self, interaction: discord.Interaction):
         user = interaction.user
-        if not user.voice or not user.voice.channel:
+        vc = self.get_user_vc(user)
+        if not vc:
             await interaction.response.send_message(
                 "ERROR: You must be in VC to do this action!", ephemeral=True
             )
             return
-        vc = user.voice.channel
         if vc not in self.tracked_vcs:
             await interaction.response.send_message(
                 "ERROR: This VC isn't being tracked as part of a meeting currently!",
                 ephemeral=True,
             )
             return
-        logging.info(f"{user.id} ended meeting {vc.id}")
+        logger.info(f"{user.id} ended meeting {vc.id}")
         for i in vc.members:
             self.tracked_vcs[vc].leave(i)
 
@@ -213,7 +224,7 @@ class Tracking(commands.Cog):
         response = tracked_vc.get_summary_string()
 
         meeting_record = discord.File(
-            io.StringIO(tracked_vc.get_meeting_record()),
+            io.BytesIO(tracked_vc.get_meeting_record().encode()),
             filename=f"{tracked_vc.get_date()}.yaml",
         )
 
@@ -221,7 +232,9 @@ class Tracking(commands.Cog):
             await interaction.response.send_message(
                 "Meeting summary attached in meeting_summary.txt",
                 files=[
-                    discord.File(io.StringIO(response), filename="meeting_summary.txt"),
+                    discord.File(
+                        io.BytesIO(response.encode()), filename="meeting_summary.txt"
+                    ),
                     meeting_record,
                 ],
             )

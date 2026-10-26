@@ -1,6 +1,6 @@
 # Install uv
-FROM python:3.14-slim AS builder
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+FROM python:3.15-slim AS builder
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
 
 # Use the system Python across both stages
 ENV UV_PYTHON_DOWNLOADS=0
@@ -21,7 +21,7 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable
 
-FROM python:3.14-slim
+FROM python:3.15-slim
 
 # Copy the environment, but not the source code
 COPY --from=builder /app/.venv /app/.venv
