@@ -31,6 +31,9 @@ The current production version is running on RK's personal server, although ther
 
 ## Changelog
 
+## 0.3.2
+fix bug where meeting summary yaml file date field is incorrect
+
 ### 0.3.1
 - enabled more ruff checks, added pyright typechecks
 - many small bugfixes to placate the newly added checks (no user facing changes)

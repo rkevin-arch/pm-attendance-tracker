@@ -92,7 +92,9 @@ class TrackedVC:
         return yaml.dump(
             {
                 "pmat_meeting_version": 1,
-                "date": self.get_date(),
+                "date": self.start_time.astimezone(
+                    zoneinfo.ZoneInfo("America/New_York")
+                ).date(),
                 "duration": str(datetime.datetime.now(datetime.UTC) - self.start_time),
                 "participant_ids": [u.user.id for u in self.get_active_participants()],
             }
